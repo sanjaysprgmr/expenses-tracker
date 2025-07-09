@@ -4,6 +4,8 @@ node_modules/
 # Environment variables
 .env
 
+node_modules/
+.env
 # Logs
 logs
 *.log
@@ -38,3 +40,5 @@ build/
 
 # Optional: Coverage reports (if using testing)
 coverage/
+
+
