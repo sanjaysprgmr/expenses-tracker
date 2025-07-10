@@ -9,39 +9,65 @@ const User = require('./models/user.js');
 
 const app = express();
 
-// ✅ CORS configuration
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
+const MONGO_URI = process.env.MONGODB_URI;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
+// ✅ Improved CORS Configuration
+const allowedOrigins = [
+    FRONTEND_URL,
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log(`❌ Blocked by CORS: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
 }));
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET;
-const MONGO_URI = process.env.MONGODB_URI;
-
-// ✅ Connect MongoDB
-mongoose.connect(MONGO_URI)
+// ✅ MongoDB Connection
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Auth middleware
+// ✅ Auth Middleware
 const auth = async (req, res, next) => {
     const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ message: 'Unauthorized' });
+    if (!token) {
+        console.log('❌ Unauthorized: No token provided');
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = await User.findById(decoded.id);
-        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+        if (!req.user) {
+            console.log('❌ Unauthorized: User not found');
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
         next();
-    } catch {
+    } catch (error) {
+        console.error('❌ JWT verification failed:', error.message);
         return res.status(401).json({ message: 'Unauthorized' });
     }
 };
 
 // ✅ Routes
+
+// Register
 app.post('/api/register', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -56,11 +82,13 @@ app.post('/api/register', async (req, res) => {
         const user = new User({ username, password: hashedPassword, expenses: [] });
         await user.save();
         res.json({ message: 'Registration successful' });
-    } catch {
+    } catch (error) {
+        console.error('❌ Registration error:', error.message);
         res.status(500).json({ message: 'Server error during registration' });
     }
 });
 
+// Login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -74,39 +102,61 @@ app.post('/api/login', async (req, res) => {
         }
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ token });
-    } catch {
+    } catch (error) {
+        console.error('❌ Login error:', error.message);
         res.status(500).json({ message: 'Server error during login' });
     }
 });
 
+// Get Expenses
 app.get('/api/expenses', auth, async (req, res) => {
-    res.json(req.user.expenses);
+    try {
+        res.json(req.user.expenses);
+    } catch (error) {
+        console.error('❌ Fetch expenses error:', error.message);
+        res.status(500).json({ message: 'Server error fetching expenses' });
+    }
 });
 
+// Add Expense
 app.post('/api/expenses', auth, async (req, res) => {
     const { name, amount, category } = req.body;
-    if (!name || !amount || !category) {
-        return res.status(400).json({ message: 'All fields are required' });
-    }
-    req.user.expenses.push({ name, amount, category });
-    await req.user.save();
-    res.json({ message: 'Expense added' });
-});
-
-app.delete('/api/expenses/:index', auth, async (req, res) => {
-    const index = parseInt(req.params.index);
-    if (index >= 0 && index < req.user.expenses.length) {
-        req.user.expenses.splice(index, 1);
+    try {
+        if (!name || !amount || !category) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        req.user.expenses.push({ name, amount, category });
         await req.user.save();
-        res.json({ message: 'Expense deleted' });
-    } else {
-        res.status(400).json({ message: 'Invalid index' });
+        res.json({ message: 'Expense added' });
+    } catch (error) {
+        console.error('❌ Add expense error:', error.message);
+        res.status(500).json({ message: 'Server error adding expense' });
     }
 });
 
-// ✅ Serve frontend (optional if serving SPA)
+// Delete Expense
+app.delete('/api/expenses/:index', auth, async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        if (index >= 0 && index < req.user.expenses.length) {
+            req.user.expenses.splice(index, 1);
+            await req.user.save();
+            res.json({ message: 'Expense deleted' });
+        } else {
+            res.status(400).json({ message: 'Invalid index' });
+        }
+    } catch (error) {
+        console.error('❌ Delete expense error:', error.message);
+        res.status(500).json({ message: 'Server error deleting expense' });
+    }
+});
+
+// ✅ Serve frontend for SPA routing (optional if using standalone frontend)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// ✅ Start server
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
