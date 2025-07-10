@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Expense Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 /* Styles remain unchanged */
@@ -26,20 +26,19 @@ canvas { max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
-
 <!-- UI -->
 <div class="container" id="loginContainer">
     <h2>Login</h2>
-    <input type="text" id="loginUsername" placeholder="Username">
-    <input type="password" id="loginPassword" placeholder="Password">
+    <input type="text" id="loginUsername" placeholder="Username" />
+    <input type="password" id="loginPassword" placeholder="Password" />
     <button onclick="login()">Login</button>
     <button class="link-button" onclick="showRegister()">Create Account</button>
 </div>
 
 <div class="container hidden" id="registerContainer">
     <h2>Register</h2>
-    <input type="text" id="registerUsername" placeholder="Username">
-    <input type="password" id="registerPassword" placeholder="Password">
+    <input type="text" id="registerUsername" placeholder="Username" />
+    <input type="password" id="registerPassword" placeholder="Password" />
     <button onclick="register()">Register</button>
     <button class="link-button" onclick="showLogin()">Back to Login</button>
 </div>
@@ -47,8 +46,8 @@ canvas { max-width: 100%; height: auto; }
 <div class="main hidden" id="appContainer">
     <div class="container">
         <h2>Expense Tracker</h2>
-        <input type="text" id="expenseName" placeholder="Expense Name">
-        <input type="number" id="expenseAmount" placeholder="Amount">
+        <input type="text" id="expenseName" placeholder="Expense Name" />
+        <input type="number" id="expenseAmount" placeholder="Amount" />
         <select id="expenseCategory">
             <option value="Food">Food</option>
             <option value="Transport">Transport</option>
@@ -71,9 +70,7 @@ canvas { max-width: 100%; height: auto; }
 <script>
 const API_BASE_URL = window.location.hostname.includes('localhost')
     ? 'http://localhost:5000'
-    : 'https://expenses-tracker-backend.onrender.com'; 
-
-
+    : 'https://expenses-tracker-backend.onrender.com'; // replace with your actual Render backend URL
 
 let token = localStorage.getItem('token');
 
@@ -84,103 +81,138 @@ let chart = new Chart(ctx, {
     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
 });
 
-function showRegister() { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('registerContainer').classList.remove('hidden'); }
-function showLogin() { document.getElementById('registerContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
+function showRegister() {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('registerContainer').classList.remove('hidden');
+}
+function showLogin() {
+    document.getElementById('registerContainer').classList.add('hidden');
+    document.getElementById('loginContainer').classList.remove('hidden');
+}
+
+async function safeFetch(url, options = {}) {
+    try {
+        const res = await fetch(url, options);
+        const text = await res.text();
+        try {
+            const json = JSON.parse(text);
+            if (!res.ok) throw new Error(json.message || 'Error');
+            return json;
+        } catch {
+            throw new Error(`Server error: ${text}`);
+        }
+    } catch (err) {
+        alert(err.message || 'Network error');
+        throw err;
+    }
+}
 
 async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     if (!username || !password) { alert('Please fill all fields'); return; }
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        alert('Registration successful. Please login.');
-        showLogin();
-    } catch (err) { alert(err.message); }
+    const data = await safeFetch(`${API_BASE_URL}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    alert('Registration successful. Please login.');
+    showLogin();
 }
 
 async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        token = data.token;
-        localStorage.setItem('token', token);
-        document.getElementById('loginContainer').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        updateDisplay();
-    } catch (err) { alert(err.message); }
+    const data = await safeFetch(`${API_BASE_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    token = data.token;
+    localStorage.setItem('token', token);
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    updateDisplay();
 }
 
-function logout() { token = null; localStorage.removeItem('token'); document.getElementById('appContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
+function logout() {
+    token = null;
+    localStorage.removeItem('token');
+    document.getElementById('appContainer').classList.add('hidden');
+    document.getElementById('loginContainer').classList.remove('hidden');
+}
 
 async function addExpense() {
     const name = document.getElementById('expenseName').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const category = document.getElementById('expenseCategory').value;
     if (!name || isNaN(amount) || amount <= 0) { alert('Enter valid details'); return; }
-    try {
-        await fetch(`${API_BASE_URL}/api/expenses`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': token }, body: JSON.stringify({ name, amount, category }) });
-        document.getElementById('expenseName').value = '';
-        document.getElementById('expenseAmount').value = '';
-        updateDisplay();
-    } catch (err) { alert('Error adding expense'); }
+    await safeFetch(`${API_BASE_URL}/api/expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        body: JSON.stringify({ name, amount, category })
+    });
+    document.getElementById('expenseName').value = '';
+    document.getElementById('expenseAmount').value = '';
+    updateDisplay();
 }
 
 async function deleteExpense(index) {
-    try {
-        await fetch(`${API_BASE_URL}/api/expenses/${index}`, { method: 'DELETE', headers: { 'Authorization': token } });
-        updateDisplay();
-    } catch (err) { alert('Error deleting expense'); }
+    await safeFetch(`${API_BASE_URL}/api/expenses/${index}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': token }
+    });
+    updateDisplay();
 }
 
 async function updateDisplay() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
-        const expenses = await res.json();
-        const expenseList = document.getElementById('expenseList');
-        const totalAmount = document.getElementById('totalAmount');
-        expenseList.innerHTML = '';
-        let total = 0;
-        expenses.forEach((exp, idx) => {
-            const li = document.createElement('li');
-            li.innerHTML = `${exp.name} (₹${exp.amount} - ${exp.category}) <button class='delete-btn' onclick='deleteExpense(${idx})'>Delete</button>`;
-            expenseList.appendChild(li);
-            total += exp.amount;
-        });
-        totalAmount.textContent = total.toFixed(2);
-        updateChart(expenses);
-    } catch (err) { alert('Error fetching expenses'); }
+    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
+        headers: { 'Authorization': token }
+    });
+    const expenseList = document.getElementById('expenseList');
+    const totalAmount = document.getElementById('totalAmount');
+    expenseList.innerHTML = '';
+    let total = 0;
+    expenses.forEach((exp, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${exp.name} (₹${exp.amount} - ${exp.category}) <button class='delete-btn' onclick='deleteExpense(${idx})'>Delete</button>`;
+        expenseList.appendChild(li);
+        total += exp.amount;
+    });
+    totalAmount.textContent = total.toFixed(2);
+    updateChart(expenses);
 }
 
 function updateChart(expenses) {
     const categorySums = {};
-    expenses.forEach(exp => { categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount; });
+    expenses.forEach(exp => {
+        categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount;
+    });
     chart.data.labels = Object.keys(categorySums);
     chart.data.datasets[0].data = Object.values(categorySums);
     chart.update();
 }
 
 async function exportCSV() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
-        const expenses = await res.json();
-        let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category\n";
-        expenses.forEach(exp => { csvContent += `${exp.name},${exp.amount},${exp.category}\n`; });
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `expenses.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch { alert('Error exporting CSV'); }
+    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
+        headers: { 'Authorization': token }
+    });
+    let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category\n";
+    expenses.forEach(exp => { csvContent += `${exp.name},${exp.amount},${exp.category}\n`; });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `expenses.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
-if (token) { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden'); updateDisplay(); }
+if (token) {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    updateDisplay();
+}
 </script>
 </body>
 </html>
