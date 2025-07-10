@@ -7,26 +7,129 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* Styles remain unchanged */
-* { box-sizing: border-box; }
-body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72, #2a5298); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333; padding: 20px; }
-.container { background: #fff; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); text-align: center; }
-h2 { color: #1e3c72; margin-bottom: 20px; font-weight: 600; }
-input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; transition: 0.3s; }
-button { background: #1e3c72; color: #fff; font-weight: 600; border: none; cursor: pointer; }
-button:hover { background: #163060; }
-.link-button { background: none; border: none; color: #1e3c72; text-decoration: underline; cursor: pointer; font-size: 0.95rem; margin-top: 8px; }
-.hidden { display: none; }
-.main { display: flex; gap: 20px; max-width: 900px; width: 100%; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
-ul { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; }
-li { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
-.delete-btn { background: #e74c3c; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-.delete-btn:hover { background: #c0392b; }
-canvas { max-width: 100%; height: auto; }
+/* === Reset and Base === */
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: #333;
+    padding: 20px;
+}
+
+/* === Containers === */
+.container {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+.main {
+    display: flex;
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.hidden {
+    display: none;
+}
+
+/* === Headings === */
+h2 {
+    color: #1e3c72;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+h3 {
+    text-align: center;
+}
+
+/* === Inputs and Buttons === */
+input,
+button,
+select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+button {
+    background: #1e3c72;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #163060;
+}
+.link-button {
+    background: none;
+    border: none;
+    color: #1e3c72;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin-top: 8px;
+}
+
+/* === List === */
+ul {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 10px 0;
+    text-align: left;
+}
+li {
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+.delete-btn {
+    background: #e74c3c;
+    border: none;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.delete-btn:hover {
+    background: #c0392b;
+}
+
+/* === Chart === */
+canvas {
+    max-width: 100%;
+    height: auto;
+}
 </style>
 </head>
 <body>
-<!-- UI -->
+
+<!-- Login -->
 <div class="container" id="loginContainer">
     <h2>Login</h2>
     <input type="text" id="loginUsername" placeholder="Username" />
@@ -35,6 +138,7 @@ canvas { max-width: 100%; height: auto; }
     <button class="link-button" onclick="showRegister()">Create Account</button>
 </div>
 
+<!-- Register -->
 <div class="container hidden" id="registerContainer">
     <h2>Register</h2>
     <input type="text" id="registerUsername" placeholder="Username" />
@@ -43,6 +147,7 @@ canvas { max-width: 100%; height: auto; }
     <button class="link-button" onclick="showLogin()">Back to Login</button>
 </div>
 
+<!-- App -->
 <div class="main hidden" id="appContainer">
     <div class="container">
         <h2>Expense Tracker</h2>
@@ -58,7 +163,7 @@ canvas { max-width: 100%; height: auto; }
         <button onclick="addExpense()">Add Expense</button>
         <button onclick="exportCSV()">Export CSV</button>
         <ul id="expenseList"></ul>
-        <h3 style="text-align:center;">Total: ₹<span id="totalAmount">0</span></h3>
+        <h3>Total: ₹<span id="totalAmount">0</span></h3>
         <button class="link-button" onclick="logout()">Logout</button>
     </div>
     <div class="container">
@@ -67,20 +172,35 @@ canvas { max-width: 100%; height: auto; }
     </div>
 </div>
 
+<!-- JavaScript -->
 <script>
+// API base URL based on environment
 const API_BASE_URL = window.location.hostname.includes('localhost')
     ? 'http://localhost:5000'
-    : 'https://your-backend.onrender.com'; 
+    : 'https://expenses-tracker-u5qw.onrender.com'; // replace with your deployed backend URL
 
 let token = localStorage.getItem('token');
 
+// Chart initialization
 const ctx = document.getElementById('expenseChart')?.getContext('2d');
 let chart = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    data: {
+        labels: [],
+        datasets: [{
+            data: [],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
 });
 
+// Helper functions
 function showRegister() {
     document.getElementById('loginContainer').classList.add('hidden');
     document.getElementById('registerContainer').classList.remove('hidden');
@@ -94,24 +214,35 @@ async function safeFetch(url, options = {}) {
     try {
         const res = await fetch(url, options);
         const text = await res.text();
+
+        let json;
         try {
-            const json = JSON.parse(text);
-            if (!res.ok) throw new Error(json.message || 'Error');
-            return json;
+            json = JSON.parse(text);
         } catch {
-            throw new Error(`Server error: ${text}`);
+            json = null;
         }
+
+        if (!res.ok) {
+            const message = (json && json.message) || text || 'An error occurred';
+            throw new Error(message);
+        }
+
+        return json !== null ? json : text;
     } catch (err) {
+        // Show clean alert only ONCE
         alert(err.message || 'Network error');
         throw err;
     }
 }
 
+
+
+// Auth functions
 async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     if (!username || !password) { alert('Please fill all fields'); return; }
-    const data = await safeFetch(`${API_BASE_URL}/api/register`, {
+    await safeFetch(`${API_BASE_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -119,7 +250,6 @@ async function register() {
     alert('Registration successful. Please login.');
     showLogin();
 }
-
 async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
@@ -134,7 +264,6 @@ async function login() {
     document.getElementById('appContainer').classList.remove('hidden');
     updateDisplay();
 }
-
 function logout() {
     token = null;
     localStorage.removeItem('token');
@@ -142,6 +271,7 @@ function logout() {
     document.getElementById('loginContainer').classList.remove('hidden');
 }
 
+// Expense functions
 async function addExpense() {
     const name = document.getElementById('expenseName').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
@@ -156,7 +286,6 @@ async function addExpense() {
     document.getElementById('expenseAmount').value = '';
     updateDisplay();
 }
-
 async function deleteExpense(index) {
     await safeFetch(`${API_BASE_URL}/api/expenses/${index}`, {
         method: 'DELETE',
@@ -164,7 +293,6 @@ async function deleteExpense(index) {
     });
     updateDisplay();
 }
-
 async function updateDisplay() {
     const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
         headers: { 'Authorization': token }
@@ -182,7 +310,6 @@ async function updateDisplay() {
     totalAmount.textContent = total.toFixed(2);
     updateChart(expenses);
 }
-
 function updateChart(expenses) {
     const categorySums = {};
     expenses.forEach(exp => {
@@ -192,7 +319,6 @@ function updateChart(expenses) {
     chart.data.datasets[0].data = Object.values(categorySums);
     chart.update();
 }
-
 async function exportCSV() {
     const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
         headers: { 'Authorization': token }
@@ -208,6 +334,7 @@ async function exportCSV() {
     document.body.removeChild(link);
 }
 
+// Auto-login
 if (token) {
     document.getElementById('loginContainer').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
