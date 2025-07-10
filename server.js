@@ -9,10 +9,8 @@ const User = require('./models/user.js');
 
 const app = express();
 
-// ✅ CORS configuration
-const allowedOrigin = process.env.FRONTEND_URL || '*';
 app.use(cors({
-    origin: allowedOrigin,
+    origin: process.env.FRONTEND_URL || '*',
     credentials: true,
 }));
 
@@ -23,12 +21,10 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 const MONGO_URI = process.env.MONGODB_URI;
 
-// ✅ MongoDB connection
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Auth middleware
 const auth = async (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
@@ -38,11 +34,10 @@ const auth = async (req, res, next) => {
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         next();
     } catch {
-        return res.status(401).json({ message: 'Unauthorized' });
+        res.status(401).json({ message: 'Unauthorized' });
     }
 };
 
-// ✅ Register
 app.post('/api/register', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -59,7 +54,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ✅ Login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -76,12 +70,10 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ✅ Get expenses
 app.get('/api/expenses', auth, async (req, res) => {
     res.json(req.user.expenses);
 });
 
-// ✅ Add expense
 app.post('/api/expenses', auth, async (req, res) => {
     const { name, amount, category } = req.body;
     if (!name || !amount || !category) {
@@ -92,7 +84,6 @@ app.post('/api/expenses', auth, async (req, res) => {
     res.json({ message: 'Expense added' });
 });
 
-// ✅ Delete expense
 app.delete('/api/expenses/:index', auth, async (req, res) => {
     const index = parseInt(req.params.index);
     if (index >= 0 && index < req.user.expenses.length) {
@@ -104,10 +95,10 @@ app.delete('/api/expenses/:index', auth, async (req, res) => {
     }
 });
 
-// ✅ Frontend fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Start server
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+});

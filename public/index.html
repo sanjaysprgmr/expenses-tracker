@@ -69,7 +69,7 @@ canvas { max-width: 100%; height: auto; }
 </div>
 
 <script>
-const API_BASE_URL = window.location.origin.includes('localhost')
+const API_BASE_URL = window.location.hostname.includes('localhost')
     ? 'http://localhost:5000'
     : 'https://expenses-tracker-backend.onrender.com'; 
 
