@@ -71,7 +71,8 @@ canvas { max-width: 100%; height: auto; }
 <script>
 const API_BASE_URL = window.location.origin.includes('localhost')
     ? 'http://localhost:5000'
-    : window.location.origin;
+    : 'https://expenses-tracker-backend.onrender.com'; 
+
 
 
 let token = localStorage.getItem('token');
