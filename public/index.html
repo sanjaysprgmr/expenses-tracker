@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+/* --- your styles remain unchanged --- */
 * { box-sizing: border-box; }
 body {
     font-family: 'Inter', sans-serif;
@@ -97,6 +98,9 @@ canvas { max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
+
+<!-- UI remains unchanged -->
+
 <div class="container" id="loginContainer">
     <h2>Login</h2>
     <input type="text" id="loginUsername" placeholder="Username">
@@ -138,6 +142,7 @@ canvas { max-width: 100%; height: auto; }
 </div>
 
 <script>
+const API_BASE_URL = 'https://expenses-tracker-backend.onrender.com'; // replace with your backend URL
 let token = localStorage.getItem('token');
 
 const ctx = document.getElementById('expenseChart')?.getContext('2d');
@@ -147,21 +152,15 @@ let chart = new Chart(ctx, {
     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
 });
 
-function showRegister() {
-    document.getElementById('loginContainer').classList.add('hidden');
-    document.getElementById('registerContainer').classList.remove('hidden');
-}
-function showLogin() {
-    document.getElementById('registerContainer').classList.add('hidden');
-    document.getElementById('loginContainer').classList.remove('hidden');
-}
+function showRegister() { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('registerContainer').classList.remove('hidden'); }
+function showLogin() { document.getElementById('registerContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
 
 async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     if (!username || !password) { alert('Please fill all fields'); return; }
     try {
-        const res = await fetch('http://localhost:5000/api/register', {
+        const res = await fetch(`${API_BASE_URL}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -170,16 +169,14 @@ async function register() {
         if (!res.ok) throw new Error(data.message);
         alert('Registration successful. Please login.');
         showLogin();
-    } catch (err) {
-        alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
 }
 
 async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
     try {
-        const res = await fetch('http://localhost:5000/api/login', {
+        const res = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -191,17 +188,10 @@ async function login() {
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
         updateDisplay();
-    } catch (err) {
-        alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
 }
 
-function logout() {
-    token = null;
-    localStorage.removeItem('token');
-    document.getElementById('appContainer').classList.add('hidden');
-    document.getElementById('loginContainer').classList.remove('hidden');
-}
+function logout() { token = null; localStorage.removeItem('token'); document.getElementById('appContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
 
 async function addExpense() {
     const name = document.getElementById('expenseName').value.trim();
@@ -209,7 +199,7 @@ async function addExpense() {
     const category = document.getElementById('expenseCategory').value;
     if (!name || isNaN(amount) || amount <= 0) { alert('Enter valid details'); return; }
     try {
-        await fetch('http://localhost:5000/api/expenses', {
+        await fetch(`${API_BASE_URL}/api/expenses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': token },
             body: JSON.stringify({ name, amount, category }),
@@ -217,26 +207,22 @@ async function addExpense() {
         document.getElementById('expenseName').value = '';
         document.getElementById('expenseAmount').value = '';
         updateDisplay();
-    } catch (err) {
-        alert('Error adding expense');
-    }
+    } catch (err) { alert('Error adding expense'); }
 }
 
 async function deleteExpense(index) {
     try {
-        await fetch(`http://localhost:5000/api/expenses/${index}`, {
+        await fetch(`${API_BASE_URL}/api/expenses/${index}`, {
             method: 'DELETE',
             headers: { 'Authorization': token },
         });
         updateDisplay();
-    } catch (err) {
-        alert('Error deleting expense');
-    }
+    } catch (err) { alert('Error deleting expense'); }
 }
 
 async function updateDisplay() {
     try {
-        const res = await fetch('http://localhost:5000/api/expenses', {
+        const res = await fetch(`${API_BASE_URL}/api/expenses`, {
             headers: { 'Authorization': token },
         });
         const expenses = await res.json();
@@ -252,16 +238,12 @@ async function updateDisplay() {
         });
         totalAmount.textContent = total.toFixed(2);
         updateChart(expenses);
-    } catch (err) {
-        alert('Error fetching expenses');
-    }
+    } catch (err) { alert('Error fetching expenses'); }
 }
 
 function updateChart(expenses) {
     const categorySums = {};
-    expenses.forEach(exp => {
-        categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount;
-    });
+    expenses.forEach(exp => { categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount; });
     chart.data.labels = Object.keys(categorySums);
     chart.data.datasets[0].data = Object.values(categorySums);
     chart.update();
@@ -269,14 +251,12 @@ function updateChart(expenses) {
 
 async function exportCSV() {
     try {
-        const res = await fetch('http://localhost:5000/api/expenses', {
+        const res = await fetch(`${API_BASE_URL}/api/expenses`, {
             headers: { 'Authorization': token },
         });
         const expenses = await res.json();
         let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category\n";
-        expenses.forEach(exp => {
-            csvContent += `${exp.name},${exp.amount},${exp.category}\n`;
-        });
+        expenses.forEach(exp => { csvContent += `${exp.name},${exp.amount},${exp.category}\n`; });
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement('a');
         link.setAttribute('href', encodedUri);
@@ -284,16 +264,10 @@ async function exportCSV() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    } catch {
-        alert('Error exporting CSV');
-    }
+    } catch { alert('Error exporting CSV'); }
 }
 
-if (token) {
-    document.getElementById('loginContainer').classList.add('hidden');
-    document.getElementById('appContainer').classList.remove('hidden');
-    updateDisplay();
-}
+if (token) { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden'); updateDisplay(); }
 </script>
 
 </body>
