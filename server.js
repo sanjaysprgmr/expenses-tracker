@@ -23,10 +23,11 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 const MONGO_URI = process.env.MONGODB_URI;
 
-// ✅ Connect to MongoDB Atlas
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+// ✅ Connect to MongoDB Atlas without deprecated options
+mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
+
 
 // =============================
 // Routes
