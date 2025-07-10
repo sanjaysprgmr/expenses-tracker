@@ -16,8 +16,9 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/expense-tracker';
+const MONGO_URI = process.env.MONGODB_URI;
 
+// Connect to MongoDB Atlas
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
@@ -38,6 +39,7 @@ app.post('/api/register', async (req, res) => {
 
         res.json({ message: 'Registration successful' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server error during registration' });
     }
 });
@@ -54,6 +56,7 @@ app.post('/api/login', async (req, res) => {
         const token = jwt.sign({ id: user._id }, JWT_SECRET);
         res.json({ token });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server error during login' });
     }
 });
@@ -93,7 +96,7 @@ app.delete('/api/expenses/:index', auth, async (req, res) => {
     }
 });
 
-// Serve frontend (if using plain HTML frontend)
+// Serve frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
