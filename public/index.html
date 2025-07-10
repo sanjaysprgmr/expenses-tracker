@@ -1,115 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Expense Tracker - Login/Register</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+/* Styles remain unchanged */
 * { box-sizing: border-box; }
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    color: #333;
-    padding: 20px;
-}
-.container {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    text-align: center;
-}
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72, #2a5298); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333; padding: 20px; }
+.container { background: #fff; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); text-align: center; }
 h2 { color: #1e3c72; margin-bottom: 20px; font-weight: 600; }
-input, button {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 1rem;
-    transition: 0.3s;
-}
-button {
-    background: #1e3c72;
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-}
+input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; transition: 0.3s; }
+button { background: #1e3c72; color: #fff; font-weight: 600; border: none; cursor: pointer; }
 button:hover { background: #163060; }
-.link-button {
-    background: none;
-    border: none;
-    color: #1e3c72;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.95rem;
-    margin-top: 8px;
-}
+.link-button { background: none; border: none; color: #1e3c72; text-decoration: underline; cursor: pointer; font-size: 0.95rem; margin-top: 8px; }
 .hidden { display: none; }
-.main {
-    display: flex;
-    gap: 20px;
-    max-width: 900px;
-    width: 100%;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-ul {
-    list-style: none;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
-    margin: 10px 0;
-    text-align: left;
-}
-li {
-    background: #f5f5f5;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
-}
-.delete-btn {
-    background: #e74c3c;
-    border: none;
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
+.main { display: flex; gap: 20px; max-width: 900px; width: 100%; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+ul { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; }
+li { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+.delete-btn { background: #e74c3c; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
 .delete-btn:hover { background: #c0392b; }
 canvas { max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
 
+<!-- UI -->
 <div class="container" id="loginContainer">
     <h2>Login</h2>
-    <input type="text" id="loginUsername" placeholder="Username" />
-    <input type="password" id="loginPassword" placeholder="Password" />
+    <input type="text" id="loginUsername" placeholder="Username">
+    <input type="password" id="loginPassword" placeholder="Password">
     <button onclick="login()">Login</button>
     <button class="link-button" onclick="showRegister()">Create Account</button>
 </div>
 
 <div class="container hidden" id="registerContainer">
     <h2>Register</h2>
-    <input type="text" id="registerUsername" placeholder="Username" />
-    <input type="password" id="registerPassword" placeholder="Password" />
+    <input type="text" id="registerUsername" placeholder="Username">
+    <input type="password" id="registerPassword" placeholder="Password">
     <button onclick="register()">Register</button>
     <button class="link-button" onclick="showLogin()">Back to Login</button>
 </div>
@@ -117,8 +47,8 @@ canvas { max-width: 100%; height: auto; }
 <div class="main hidden" id="appContainer">
     <div class="container">
         <h2>Expense Tracker</h2>
-        <input type="text" id="expenseName" placeholder="Expense Name" />
-        <input type="number" id="expenseAmount" placeholder="Amount" />
+        <input type="text" id="expenseName" placeholder="Expense Name">
+        <input type="number" id="expenseAmount" placeholder="Amount">
         <select id="expenseCategory">
             <option value="Food">Food</option>
             <option value="Transport">Transport</option>
@@ -139,38 +69,25 @@ canvas { max-width: 100%; height: auto; }
 </div>
 
 <script>
-const API_BASE_URL = 'https://expenses-tracker-backend.onrender.com'; // replace with your backend URL
+const API_BASE_URL = window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin;
 let token = localStorage.getItem('token');
 
 const ctx = document.getElementById('expenseChart')?.getContext('2d');
 let chart = new Chart(ctx, {
     type: 'doughnut',
-    data: {
-        labels: [],
-        datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }]
-    },
+    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
 });
 
-function showRegister() {
-    document.getElementById('loginContainer').classList.add('hidden');
-    document.getElementById('registerContainer').classList.remove('hidden');
-}
-function showLogin() {
-    document.getElementById('registerContainer').classList.add('hidden');
-    document.getElementById('loginContainer').classList.remove('hidden');
-}
+function showRegister() { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('registerContainer').classList.remove('hidden'); }
+function showLogin() { document.getElementById('registerContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
 
 async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     if (!username || !password) { alert('Please fill all fields'); return; }
     try {
-        const res = await fetch(`${API_BASE_URL}/api/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         alert('Registration successful. Please login.');
@@ -182,11 +99,7 @@ async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
     try {
-        const res = await fetch(`${API_BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const res = await fetch(`${API_BASE_URL}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         token = data.token;
@@ -197,12 +110,7 @@ async function login() {
     } catch (err) { alert(err.message); }
 }
 
-function logout() {
-    token = null;
-    localStorage.removeItem('token');
-    document.getElementById('appContainer').classList.add('hidden');
-    document.getElementById('loginContainer').classList.remove('hidden');
-}
+function logout() { token = null; localStorage.removeItem('token'); document.getElementById('appContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
 
 async function addExpense() {
     const name = document.getElementById('expenseName').value.trim();
@@ -210,11 +118,7 @@ async function addExpense() {
     const category = document.getElementById('expenseCategory').value;
     if (!name || isNaN(amount) || amount <= 0) { alert('Enter valid details'); return; }
     try {
-        await fetch(`${API_BASE_URL}/api/expenses`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': token },
-            body: JSON.stringify({ name, amount, category })
-        });
+        await fetch(`${API_BASE_URL}/api/expenses`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': token }, body: JSON.stringify({ name, amount, category }) });
         document.getElementById('expenseName').value = '';
         document.getElementById('expenseAmount').value = '';
         updateDisplay();
@@ -223,19 +127,14 @@ async function addExpense() {
 
 async function deleteExpense(index) {
     try {
-        await fetch(`${API_BASE_URL}/api/expenses/${index}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': token }
-        });
+        await fetch(`${API_BASE_URL}/api/expenses/${index}`, { method: 'DELETE', headers: { 'Authorization': token } });
         updateDisplay();
     } catch (err) { alert('Error deleting expense'); }
 }
 
 async function updateDisplay() {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/expenses`, {
-            headers: { 'Authorization': token }
-        });
+        const res = await fetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
         const expenses = await res.json();
         const expenseList = document.getElementById('expenseList');
         const totalAmount = document.getElementById('totalAmount');
@@ -254,9 +153,7 @@ async function updateDisplay() {
 
 function updateChart(expenses) {
     const categorySums = {};
-    expenses.forEach(exp => {
-        categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount;
-    });
+    expenses.forEach(exp => { categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount; });
     chart.data.labels = Object.keys(categorySums);
     chart.data.datasets[0].data = Object.values(categorySums);
     chart.update();
@@ -264,14 +161,10 @@ function updateChart(expenses) {
 
 async function exportCSV() {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/expenses`, {
-            headers: { 'Authorization': token }
-        });
+        const res = await fetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
         const expenses = await res.json();
         let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category\n";
-        expenses.forEach(exp => {
-            csvContent += `${exp.name},${exp.amount},${exp.category}\n`;
-        });
+        expenses.forEach(exp => { csvContent += `${exp.name},${exp.amount},${exp.category}\n`; });
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement('a');
         link.setAttribute('href', encodedUri);
@@ -282,12 +175,7 @@ async function exportCSV() {
     } catch { alert('Error exporting CSV'); }
 }
 
-if (token) {
-    document.getElementById('loginContainer').classList.add('hidden');
-    document.getElementById('appContainer').classList.remove('hidden');
-    updateDisplay();
-}
+if (token) { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden'); updateDisplay(); }
 </script>
-
 </body>
 </html>

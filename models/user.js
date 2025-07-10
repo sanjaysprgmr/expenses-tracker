@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
-const ExpenseSchema = new mongoose.Schema({
+const expenseSchema = new mongoose.Schema({
     name: String,
     amount: Number,
     category: String,
 });
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     username: { type: String, unique: true },
     password: String,
-    expenses: [ExpenseSchema],
+    expenses: [expenseSchema],
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);
