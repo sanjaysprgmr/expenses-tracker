@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 const MONGO_URI = process.env.MONGODB_URI;
 
-// Connect to MongoDB Atlas
+// ✅ Connect to MongoDB Atlas
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
@@ -61,6 +61,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// ✅ Auth middleware
 const auth = async (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
@@ -69,11 +70,13 @@ const auth = async (req, res, next) => {
         req.user = await User.findById(decoded.id);
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         next();
-    } catch {
+    } catch (error) {
+        console.error(error);
         res.status(401).json({ message: 'Unauthorized' });
     }
 };
 
+// ✅ Expense routes
 app.get('/api/expenses', auth, async (req, res) => {
     res.json(req.user.expenses);
 });
@@ -96,10 +99,10 @@ app.delete('/api/expenses/:index', auth, async (req, res) => {
     }
 });
 
-// Serve frontend
+// ✅ Serve frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
+// ✅ Start server
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
