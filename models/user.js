@@ -1,15 +1,18 @@
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    amount: { type: Number, required: true },
-    category: { type: String, required: true },
-    date: { type: Date, default: Date.now } // ✅ Added for storing date/time
+    name: String,
+    amount: Number,
+    category: String,
+    date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
+    username: { type: String, unique: true },
+    password: String,
     expenses: [expenseSchema],
 });
 

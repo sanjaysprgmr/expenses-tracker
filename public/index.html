@@ -6,60 +6,99 @@
 <title>Expense Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <style>
 /* === Reset and Base === */
 * { box-sizing: border-box; }
 body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #1e3c72, #2a5298);
-    display: flex; justify-content: center; align-items: center;
-    height: 100vh; margin: 0; color: #333; padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: #333;
+    padding: 20px;
 }
-/* === Containers === */
 .container {
-    background: #fff; padding: 25px; border-radius: 12px;
-    width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 .main {
-    display: flex; gap: 20px; max-width: 1200px; width: 100%;
-    align-items: flex-start; flex-wrap: wrap; justify-content: center;
+    display: flex;
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 .hidden { display: none; }
-/* === Headings === */
-h2 { color: #1e3c72; margin-bottom: 20px; font-weight: 600; }
+h2 {
+    color: #1e3c72;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
 h3 { text-align: center; }
-/* === Inputs and Buttons === */
 input, button, select {
-    width: 100%; padding: 12px; margin: 8px 0;
-    border-radius: 8px; border: 1px solid #ddd;
-    font-size: 1rem; transition: 0.3s;
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    transition: 0.3s;
 }
 button {
-    background: #1e3c72; color: #fff; font-weight: 600;
-    border: none; cursor: pointer;
+    background: #1e3c72;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
 }
 button:hover { background: #163060; }
 .link-button {
-    background: none; border: none; color: #1e3c72;
-    text-decoration: underline; cursor: pointer;
-    font-size: 0.95rem; margin-top: 8px;
+    background: none;
+    border: none;
+    color: #1e3c72;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin-top: 8px;
 }
-/* === List === */
-ul { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; }
+ul {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 10px 0;
+    text-align: left;
+}
 li {
-    background: #f5f5f5; padding: 10px; margin: 5px 0;
-    border-radius: 6px; display: flex; justify-content: space-between;
-    align-items: center; font-size: 0.9rem; flex-wrap: wrap;
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
 }
 .delete-btn {
-    background: #e74c3c; border: none; color: #fff;
-    padding: 4px 8px; border-radius: 4px;
-    cursor: pointer; font-size: 0.85rem;
+    background: #e74c3c;
+    border: none;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
 }
 .delete-btn:hover { background: #c0392b; }
-/* === Chart === */
 canvas { max-width: 100%; height: auto; }
 </style>
 </head>
@@ -105,77 +144,66 @@ canvas { max-width: 100%; height: auto; }
     <div class="container">
         <h2>Expense Summary</h2>
         <canvas id="expenseChart"></canvas>
-        <h2>Expenses vs Date</h2>
+        <h2 style="margin-top: 30px;">Expenses vs Date</h2>
         <canvas id="dateChart"></canvas>
     </div>
 </div>
 
 <!-- JavaScript -->
 <script>
-// API base URL
+// API base URL based on environment
 const API_BASE_URL = window.location.hostname.includes('localhost')
     ? 'http://localhost:5000'
-    : 'https://expenses-tracker-u5qw.onrender.com';
+    : 'https://expenses-tracker-u5qw.onrender.com'; // replace with your deployed backend URL
 
 let token = localStorage.getItem('token');
 
-// Doughnut Chart
-const ctx = document.getElementById('expenseChart')?.getContext('2d');
-let chart = new Chart(ctx, {
+// Charts
+const ctx1 = document.getElementById('expenseChart')?.getContext('2d');
+const ctx2 = document.getElementById('dateChart')?.getContext('2d');
+
+let chart1 = new Chart(ctx1, {
     type: 'doughnut',
-    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF'] }] },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom' },
-            datalabels: {
-                color: '#fff',
-                font: { weight: 'bold' },
-                formatter: (value, context) => {
-                    const dataArr = context.chart.data.datasets[0].data;
-                    const total = dataArr.reduce((a,b)=>a+b,0);
-                    return total ? (value/total*100).toFixed(1)+'%' : '0%';
-                }
-            }
-        }
-    },
-    plugins: [ChartDataLabels]
+    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
 });
 
-// Line Chart for Expenses vs Date
-const dateCtx = document.getElementById('dateChart')?.getContext('2d');
-let dateChart = new Chart(dateCtx, {
+let chart2 = new Chart(ctx2, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'Expenses', data: [], borderColor: '#36A2EB', backgroundColor: 'rgba(54,162,235,0.2)', tension: 0.3 }] },
+    data: { labels: [], datasets: [{ label: 'Expenses', data: [], fill: false, borderColor: '#36A2EB', tension: 0.3 }] },
     options: {
         responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { x: { title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Amount (₹)' }, beginAtZero: true } }
+        scales: { x: { title: { display: true, text: 'Date' } }, y: { title: { display: true, text: 'Amount' } } }
     }
 });
 
-// Helper Functions
-function showRegister() { document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('registerContainer').classList.remove('hidden'); }
-function showLogin() { document.getElementById('registerContainer').classList.add('hidden'); document.getElementById('loginContainer').classList.remove('hidden'); }
-
-async function safeFetch(url, options={}) {
+// Auth functions
+function showRegister() {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('registerContainer').classList.remove('hidden');
+}
+function showLogin() {
+    document.getElementById('registerContainer').classList.add('hidden');
+    document.getElementById('loginContainer').classList.remove('hidden');
+}
+async function safeFetch(url, options = {}) {
     try {
         const res = await fetch(url, options);
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch { json = null; }
-        if (!res.ok) { throw new Error((json && json.message) || text || 'Error'); }
-        return json !== null ? json : text;
-    } catch(err) { alert(err.message || 'Network error'); throw err; }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'An error occurred');
+        return data;
+    } catch (err) {
+        alert(err.message || 'Network error');
+        throw err;
+    }
 }
-
-// Auth
 async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
-    if (!username || !password) { alert('Fill all fields'); return; }
+    if (!username || !password) return alert('Please fill all fields');
     await safeFetch(`${API_BASE_URL}/api/register`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
     alert('Registration successful. Please login.');
@@ -185,7 +213,8 @@ async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
     const data = await safeFetch(`${API_BASE_URL}/api/login`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     });
     token = data.token;
@@ -195,17 +224,18 @@ async function login() {
     updateDisplay();
 }
 function logout() {
-    token = null; localStorage.removeItem('token');
+    token = null;
+    localStorage.removeItem('token');
     document.getElementById('appContainer').classList.add('hidden');
     document.getElementById('loginContainer').classList.remove('hidden');
 }
 
-// Expenses
+// Expense functions
 async function addExpense() {
     const name = document.getElementById('expenseName').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const category = document.getElementById('expenseCategory').value;
-    if (!name || isNaN(amount) || amount <= 0) { alert('Enter valid details'); return; }
+    if (!name || isNaN(amount) || amount <= 0) return alert('Enter valid details');
     await safeFetch(`${API_BASE_URL}/api/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': token },
@@ -216,62 +246,65 @@ async function addExpense() {
     updateDisplay();
 }
 async function deleteExpense(index) {
-    await safeFetch(`${API_BASE_URL}/api/expenses/${index}`, { method: 'DELETE', headers: { 'Authorization': token } });
+    await safeFetch(`${API_BASE_URL}/api/expenses/${index}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': token }
+    });
     updateDisplay();
 }
 async function updateDisplay() {
-    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
+    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
+        headers: { 'Authorization': token }
+    });
     const expenseList = document.getElementById('expenseList');
     const totalAmount = document.getElementById('totalAmount');
     expenseList.innerHTML = '';
     let total = 0;
     expenses.forEach((exp, idx) => {
         const date = new Date(exp.date);
-        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        const formattedDate = date.toLocaleString();
         const li = document.createElement('li');
         li.innerHTML = `${exp.name} (₹${exp.amount} - ${exp.category}) <br><small>${formattedDate}</small> <button class='delete-btn' onclick='deleteExpense(${idx})'>Delete</button>`;
         expenseList.appendChild(li);
         total += exp.amount;
     });
     totalAmount.textContent = total.toFixed(2);
-    updateChart(expenses);
+    updateCharts(expenses);
 }
-
-// Chart Updater
-function updateChart(expenses) {
-    // Doughnut chart
+function updateCharts(expenses) {
+    // Update category pie chart
     const categorySums = {};
     expenses.forEach(exp => {
         categorySums[exp.category] = (categorySums[exp.category] || 0) + exp.amount;
     });
-    chart.data.labels = Object.keys(categorySums);
-    chart.data.datasets[0].data = Object.values(categorySums);
-    chart.update();
+    chart1.data.labels = Object.keys(categorySums);
+    chart1.data.datasets[0].data = Object.values(categorySums);
+    chart1.update();
 
-    // Line chart (Expenses vs Date)
-    const dateSums = {};
+    // Update expenses vs date line chart
+    const dateMap = {};
     expenses.forEach(exp => {
         const dateKey = new Date(exp.date).toLocaleDateString();
-        dateSums[dateKey] = (dateSums[dateKey] || 0) + exp.amount;
+        dateMap[dateKey] = (dateMap[dateKey] || 0) + exp.amount;
     });
-    const sortedDates = Object.keys(dateSums).sort((a,b) => new Date(a) - new Date(b));
-    dateChart.data.labels = sortedDates;
-    dateChart.data.datasets[0].data = sortedDates.map(date => dateSums[date]);
-    dateChart.update();
+    const sortedDates = Object.keys(dateMap).sort((a, b) => new Date(a) - new Date(b));
+    chart2.data.labels = sortedDates;
+    chart2.data.datasets[0].data = sortedDates.map(date => dateMap[date]);
+    chart2.update();
 }
-
-// CSV Export
 async function exportCSV() {
-    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, { headers: { 'Authorization': token } });
-    let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category,Date\n";
+    const expenses = await safeFetch(`${API_BASE_URL}/api/expenses`, {
+        headers: { 'Authorization': token }
+    });
+    let csvContent = "data:text/csv;charset=utf-8,Name,Amount,Category,Date\\n";
     expenses.forEach(exp => {
         const date = new Date(exp.date).toLocaleString();
-        csvContent += `${exp.name},${exp.amount},${exp.category},${date}\n`;
+        csvContent += `${exp.name},${exp.amount},${exp.category},${date}\\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `expenses.csv`);
+    link.setAttribute('download', 'expenses.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -14,7 +14,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'yoursecretkey';
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/expense-tracker';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
 
-// ✅ CORS Configuration
 app.use(cors({
     origin: [FRONTEND_URL, 'http://localhost:5500', 'http://127.0.0.1:5500'],
     credentials: true,
@@ -23,23 +22,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ Connect MongoDB
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Authentication Middleware
 const auth = async (req, res, next) => {
     const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(401).json({ message: 'Unauthorized: No token provided' });
-    }
+    if (!token) return res.status(401).json({ message: 'Unauthorized: No token provided' });
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.id);
-        if (!user) {
-            return res.status(401).json({ message: 'Unauthorized: User not found' });
-        }
+        if (!user) return res.status(401).json({ message: 'Unauthorized: User not found' });
         req.user = user;
         next();
     } catch (error) {
@@ -47,17 +40,12 @@ const auth = async (req, res, next) => {
     }
 };
 
-// ✅ Register Route
 app.post('/api/register', async (req, res) => {
     const { username, password } = req.body;
     try {
-        if (!username || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
-        }
+        if (!username || !password) return res.status(400).json({ message: 'All fields are required' });
         const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(409).json({ message: 'Username already exists' });
-        }
+        if (existingUser) return res.status(409).json({ message: 'Username already exists' });
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ username, password: hashedPassword, expenses: [] });
         await user.save();
@@ -68,18 +56,13 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ✅ Login Route
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
         const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
+        if (!user) return res.status(400).json({ message: 'Invalid credentials' });
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
+        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ token });
     } catch (error) {
@@ -88,7 +71,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ✅ Get Expenses
 app.get('/api/expenses', auth, async (req, res) => {
     try {
         res.json(req.user.expenses);
@@ -98,18 +80,15 @@ app.get('/api/expenses', auth, async (req, res) => {
     }
 });
 
-// ✅ Add Expense (now includes `date`)
 app.post('/api/expenses', auth, async (req, res) => {
     const { name, amount, category } = req.body;
     try {
-        if (!name || !amount || !category) {
-            return res.status(400).json({ message: 'All fields are required' });
-        }
+        if (!name || !amount || !category) return res.status(400).json({ message: 'All fields are required' });
         req.user.expenses.push({
             name,
             amount,
             category,
-            date: new Date() // ✅ Adds current date & time
+            date: new Date() // capture the exact date/time at the time of addition
         });
         await req.user.save();
         res.status(201).json({ message: 'Expense added' });
@@ -119,7 +98,6 @@ app.post('/api/expenses', auth, async (req, res) => {
     }
 });
 
-// ✅ Delete Expense
 app.delete('/api/expenses/:index', auth, async (req, res) => {
     try {
         const index = parseInt(req.params.index);
@@ -135,12 +113,10 @@ app.delete('/api/expenses/:index', auth, async (req, res) => {
     }
 });
 
-// ✅ Serve Frontend (optional if using local frontend)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
