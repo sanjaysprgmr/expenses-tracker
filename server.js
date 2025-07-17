@@ -98,14 +98,19 @@ app.get('/api/expenses', auth, async (req, res) => {
     }
 });
 
-// ✅ Add Expense
+// ✅ Add Expense (now includes `date`)
 app.post('/api/expenses', auth, async (req, res) => {
     const { name, amount, category } = req.body;
     try {
         if (!name || !amount || !category) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-        req.user.expenses.push({ name, amount, category });
+        req.user.expenses.push({
+            name,
+            amount,
+            category,
+            date: new Date() // ✅ Adds current date & time
+        });
         await req.user.save();
         res.status(201).json({ message: 'Expense added' });
     } catch (error) {
